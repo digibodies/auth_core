@@ -1,4 +1,4 @@
 # These requirements are installed to ./app/external and deployed to appspot
 
-git+git://github.com/digibodies/core.git#egg=core
+git+git://github.com/digibodies/core.git@v0.0.1#egg=core
 PyJWT

@@ -1,7 +1,12 @@
 from auth_core.constants import ACTIVATED_LOGIN_KEY
+from auth_core.constants import REQUEST_USER_KEY
 from auth_core.authentication import authenticate
 from auth_core.entities import AnonymousAuthUser
 from auth_core.errors import AuthenticationError
+
+__all__ = ['mark_user_authenticated',
+           'get_auth_type_and_token_from_header',
+           'get_user']
 
 
 def mark_user_authenticated(user, login):
@@ -12,7 +17,7 @@ def mark_user_authenticated(user, login):
     return user
 
 
-def get_user_from_request(request):
+def authenticate_user_from_request(request):
     """
     Given a request, attempt to authenticate based on Auth Header Scheme/Credentials
     Called via the middleware, etc
@@ -41,3 +46,12 @@ def get_auth_type_and_token_from_header(raw_auth_header_val):
     if not raw_auth_header_val:
         raise AuthenticationError("No Header Value Given")
     return raw_auth_header_val.split(' ', 1)
+
+
+def get_user(request):
+    return getattr(request, REQUEST_USER_KEY, None)
+
+
+def set_user(request, user):
+    setattr(request, REQUEST_USER_KEY, user)
+    return True

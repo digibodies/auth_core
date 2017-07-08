@@ -1,18 +1,15 @@
 # Authentication Exceptions
+from core import exceptions as core_exceptions
 
 
-class AuthError(Exception):
-    pass
-
-
-class AuthenticationError(AuthError):
+class AuthenticationError(core_exceptions.AuthenticationException):
     """
     Base Authentication Error class
     """
     pass
 
 
-class AuthorizationError(AuthError):
+class PermissionException(core_exceptions.PermissionException):
     """
     """
     pass

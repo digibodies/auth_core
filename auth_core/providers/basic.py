@@ -7,6 +7,8 @@ from Crypto.Protocol.KDF import PBKDF2
 from auth_core.errors import AuthenticationError
 from auth_core.entities import AuthUser, AuthLogin
 
+__all__ = ['get_user_by_token']
+
 # Service specific constants - do not use externally
 PBKDF2_ITERATIONS = 5000
 KEY_LENGTH = 32
@@ -15,6 +17,7 @@ KEY_LENGTH = 32
 def get_user_by_token(token):
     """
     Given a raw token, attempt to validate it
+    TODO: Rename this credential_token?
     """
 
     decoded_token = base64.b64decode(token)
