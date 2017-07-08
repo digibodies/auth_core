@@ -21,43 +21,15 @@ def get_user_by_id(resource_id):
         return None
 
 
-def get_login_by_user_and_type_and_key(user_key, login_auth_type):
+def get_login_by_user_and_type_and_key(user_key, login_type, login_key):
     """
-    TODO: How do we support, say multiple twitter logins?
     """
 
     # TODO: Ensure known login_auth_type
 
-    l_key = AuthLogin.generate_key(user_key, login_auth_type, )
+    l_key = AuthLogin.generate_key(user_key, login_type, login_key)
     login = l_key.get()
     return login
-
-"""
-def create_user_temp():
-    key_hex, salt_hex = basic.encode_password('fYKp?$!69+berA7z@kv3uGS#VhEB5')
-
-    # TODO: Do this in a transaction
-    un = 'utility_user'
-    user = AuthUser.query(AuthUser.username==un).get()
-    if (not user):
-        user = AuthUser(username=un,
-                        email='mhoaglund@gmail.com',
-                        first_name='Utility',
-                        last_name='User')
-
-    user.is_activated = True
-    user.put()
-
-    login = AuthLogin(key=AuthLogin.generate_key(user.key, 'basic'))
-    login.auth_type = 'basic'
-    login.auth_token = key_hex
-    login.auth_data = salt_hex
-    login.user_key = user.key
-
-    login.put()
-
-    raise Exception("WHAAAAAAAZ?")
-"""
 
 
 def create_user(username, email, first_name, last_name):
@@ -75,14 +47,18 @@ def create_user(username, email, first_name, last_name):
     return user
 
 
-def create_login(user, auth_type, auth_token, auth_data=None):
-    login = AuthLogin(key=AuthLogin.generate_key(user.key, auth_type))
+def create_login(user, auth_type, auth_key, auth_data=None):
+    """
+    """
 
-    if (auth_type == 'basic'):
-        auth_token, auth_data = basic.encode_password(auth_token)
+    if not auth_type == 'basic':
+        raise Exception('unsupported provider')
+
+    auth_type, auth_key, auth_data = basic.get_login_properties(user, auth_key, auth_data)
+    login = AuthLogin(key=AuthLogin.generate_key(user.key, auth_type, auth_key))
 
     login.auth_type = auth_type
-    login.auth_token = auth_token
+    login.auth_key = auth_key
     login.auth_data = auth_data
     login.user_key = user.key
 

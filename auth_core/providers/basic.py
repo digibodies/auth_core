@@ -6,7 +6,7 @@ from Crypto.Protocol.KDF import PBKDF2
 
 from auth_core.errors import AuthenticationError
 from auth_core.entities import AuthUser, AuthLogin
-
+from auth_core.appengine_tools import get_resource_id_from_key
 __all__ = ['get_user_by_token']
 
 # Service specific constants - do not use externally
@@ -27,10 +27,12 @@ def get_user_by_token(token):
     if not user:
         raise AuthenticationError('Username is invalid')
 
-    l_key = AuthLogin.generate_key(user.key, 'basic')
+    l_key = AuthLogin.generate_key(user.key, 'basic', get_resource_id_from_key(user.key))
     login = l_key.get()
 
-    if not validate_password(pw, login.auth_token, login.auth_data):
+    pwhash, pwsalt = login.auth_data.split(":")
+
+    if not validate_password(pw, pwhash, pwsalt):
         raise AuthenticationError('Password is invalid')
 
     return user, login
@@ -57,7 +59,6 @@ def validate_password(raw_password, encrypted_password, salt_hex):
 
     return encrypted_password == key.encode('hex')
 
-
 """
 def create_temp():
 
@@ -83,3 +84,26 @@ def create_temp():
 
     login.put()
 """
+
+def get_login_properties_for_google(user, auth_key, auth_data=None):
+    """
+    """
+
+
+    return
+
+
+def get_login_properties(user, auth_key=None, auth_data=None):
+    """
+    :param user: Instance of user we're creating Login for
+    :param auth_key: Ignored
+    :param auth_data: raw_password
+    """
+
+    # Take raw password and encrypt
+    auth_key = get_resource_id_from_key(user.key)
+
+    pwhash, pwsalt = encode_password(auth_data)
+    auth_data = "%s:%s" % (pwhash, pwsalt)
+
+    return 'basic', auth_key, auth_data

@@ -88,11 +88,10 @@ class MakeTokenUserDataDictTests(TestCaseBase):
         # Setup Test
         user_key = AuthUser(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
-
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic'),
+        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
-                              auth_token='hashed_password',
-                              auth_data='salt',
+                              auth_key=user_id,
+                              auth_data='hashed_password:salt',
                               user_key=user_key).put()
 
         # Run Code to Test
@@ -111,13 +110,13 @@ class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
         user_key = AuthUser(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
 
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic'),
+        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
-                              auth_token='hashed_password',
-                              auth_data='salt',
+                              auth_key=user_id,
+                              auth_data='hashed_password:salt',
                               user_key=user_key).put()
 
-        user_data = {'id': user_id, 'login_type': 'basic', 'version': 1}
+        user_data = {'id': user_id, 'login_key': user_id, 'login_type': 'basic', 'version': 1}
         access_token = access_tokens_api.create_access_token(user_data)
 
         # Run Code To Test
@@ -138,13 +137,14 @@ class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
 
     def test_invalid_user_id(self):
         user_key = AuthUser(username="testUser1").put()
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic'),
+        user_id = get_resource_id_from_key(user_key)
+        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
-                              auth_token='hashed_password',
-                              auth_data='salt',
+                              auth_key=user_id,
+                              auth_data='hashed_password:salt',
                               user_key=user_key).put()
 
-        user_data = {'id': 'invalid', 'login_type': 'basic', 'version': 1}
+        user_data = {'id': 'invalid', 'login_key': user_id, 'login_type': 'basic', 'version': 1}
         access_token = access_tokens_api.create_access_token(user_data)
         self.assertRaises(AuthenticationError, access_tokens_api.get_user_and_login_from_access_token, access_token)
 
@@ -152,13 +152,13 @@ class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
         user_key = AuthUser(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
 
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic'),
+        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
-                              auth_token='hashed_password',
-                              auth_data='salt',
+                              auth_key=user_id,
+                              auth_data='hashed_password:salt',
                               user_key=user_key).put()
 
-        user_data = {'id': user_id, 'login_type': 'invalid_type', 'version': 1}
+        user_data = {'id': user_id, 'login_key': user_id, 'login_type': 'invalid_type', 'version': 1}
         access_token = access_tokens_api.create_access_token(user_data)
         access_tokens_api.get_user_and_login_from_access_token(access_token)
 

@@ -45,20 +45,19 @@ class AuthLogin(ndb.Model):
     Note: Entity keys are defined by AuthLogin.generate_key() and the user is the parent of the EG
     """
     auth_type = ndb.StringProperty()
-    auth_token = ndb.StringProperty()
-    auth_data = ndb.StringProperty()
+    auth_key = ndb.StringProperty()
+    auth_data = ndb.TextProperty()
     user_key = ndb.KeyProperty(kind=AuthUser)
 
     @staticmethod
-    def generate_key_name(user_key, auth_type):
+    def generate_key_name(user_key, auth_type, auth_key):
         # TODO: Check for valid auth_type
         # TODO: Check arg types
-        # TODO: This auth_type_should probably be an int
-        return "%s:%s" % (user_key.id(), auth_type)
+        return "%s:%s:%s" % (user_key.id(), auth_type, auth_key)
 
     @staticmethod
-    def generate_key(user_key, auth_type):
-        return ndb.Key('AuthLogin', AuthLogin.generate_key_name(user_key, auth_type),
+    def generate_key(user_key, auth_type, auth_key):
+        return ndb.Key('AuthLogin', AuthLogin.generate_key_name(user_key, auth_type, auth_key),
                        parent=user_key)
 
 

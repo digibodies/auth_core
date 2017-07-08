@@ -78,7 +78,7 @@ def get_user_and_login_from_access_token(access_token):
     # Get critical bits off user token
     user_id = user_data.get(TOKEN_KEYS_V1.USER_ID, None)  # i.e. resource id
     login_auth_type = user_data.get(TOKEN_KEYS_V1.LOGIN_TYPE, None)  # i.e "google"
-    # login_auth_key = user_data.get(TOKEN_KEYS.LOGIN_KEY, None) # i.e. google uid
+    login_auth_key = user_data.get(TOKEN_KEYS_V1.LOGIN_KEY, None)  # i.e. google uid or user id
 
     # Resolve User
     user = users_api.get_user_by_id(user_id)
@@ -91,7 +91,11 @@ def get_user_and_login_from_access_token(access_token):
         # How did you originally login?
         raise AuthenticationError("Could not determine login auth type from key")
 
-    l_key = users_api.AuthLogin.generate_key(user.key, login_auth_type)
+    if not login_auth_key:
+        # How did you originally login?
+        raise AuthenticationError("Could not determine login auth key from key")
+
+    l_key = users_api.AuthLogin.generate_key(user.key, login_auth_type, login_auth_key)
     login = l_key.get()
 
     return user, login
@@ -107,7 +111,8 @@ def make_token_user_data_dict(user, login, version=1):
     data = {
         TOKEN_KEYS_V1.VERSION: version,
         TOKEN_KEYS_V1.USER_ID: get_resource_id_from_key(user.key),
-        TOKEN_KEYS_V1.LOGIN_TYPE: login.auth_type
+        TOKEN_KEYS_V1.LOGIN_TYPE: login.auth_type,
+        TOKEN_KEYS_V1.LOGIN_KEY: login.auth_key
     }
 
     return data

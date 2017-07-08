@@ -9,4 +9,4 @@ class TOKEN_KEYS_V1(object):
     VERSION = 'version'
     USER_ID = 'id'
     LOGIN_TYPE = 'login_type'
-    # LOGIN_KEY = 'login_key'
+    LOGIN_KEY = 'login_key'

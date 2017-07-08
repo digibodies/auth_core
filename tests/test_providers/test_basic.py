@@ -2,6 +2,7 @@ import base64
 
 from tests import TestCaseBase
 
+from auth_core.appengine_tools import get_resource_id_from_key
 from auth_core.providers import basic
 from auth_core.entities import AuthUser, AuthLogin
 from auth_core.errors import AuthenticationError
@@ -38,12 +39,12 @@ class GetUserByToken(TestCaseBase):
         user_key = AuthUser(username="testUser1").put()
 
         # Create a password
-        pwkey, pwsalt = basic.encode_password('jive')
-
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic'),
+        pwhash, pwsalt = basic.encode_password('jive')
+        user_id = get_resource_id_from_key(user_key)
+        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
-                              auth_token=pwkey,
-                              auth_data=pwsalt,
+                              auth_key=user_id,
+                              auth_data="%s:%s" % (pwhash, pwsalt),
                               user_key=user_key).put()
 
         # Create credential token
@@ -58,12 +59,12 @@ class GetUserByToken(TestCaseBase):
         user_key = AuthUser(username="testUser1").put()
 
         # Create a password
-        pwkey, pwsalt = basic.encode_password('jive')
-
-        AuthLogin(key=AuthLogin.generate_key(user_key, 'basic'),
+        pwhash, pwsalt = basic.encode_password('jive')
+        user_id = get_resource_id_from_key(user_key)
+        AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
                   auth_type='basic',
-                  auth_token=pwkey,
-                  auth_data=pwsalt,
+                  auth_key=user_id,
+                  auth_data="%s:%s" % (pwhash, pwsalt),
                   user_key=user_key).put()
 
         # Create credential token
