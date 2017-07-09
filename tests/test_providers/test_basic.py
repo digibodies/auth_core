@@ -74,3 +74,12 @@ class GetUserByToken(TestCaseBase):
     def test_user_doesnot_exist(self):
         credential_token = base64.b64encode('badguy:jive')
         self.assertRaises(AuthenticationError, basic.get_user_by_token, credential_token)
+
+    def test_invalid_token(self):
+        # Non b64 friendly
+        credential_token = 'invalidpadding'
+        self.assertRaises(AuthenticationError, basic.get_user_by_token, credential_token)
+
+        # Wonky format - not un:pw format
+        credential_token = base64.b64encode('no_colon_separator')
+        self.assertRaises(AuthenticationError, basic.get_user_by_token, credential_token)

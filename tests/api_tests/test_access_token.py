@@ -101,6 +101,7 @@ class MakeTokenUserDataDictTests(TestCaseBase):
         # Check Results
         self.assertDictEqual(result, {'login_type': u'basic',
                                       'version': 1,
+                                      'login_key': user_id,
                                       'id': user_id})
 
 

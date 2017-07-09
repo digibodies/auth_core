@@ -20,8 +20,15 @@ def get_user_by_token(token):
     TODO: Rename this credential_token?
     """
 
-    decoded_token = base64.b64decode(token)
-    un, pw = decoded_token.split(':')
+    try:
+        decoded_token = base64.b64decode(token)
+    except TypeError, e:
+        raise AuthenticationError(e)
+
+    try:
+        un, pw = decoded_token.split(':')
+    except ValueError, e:
+        raise AuthenticationError(e)
 
     user = AuthUser.query(AuthUser.username==un).get()
     if not user:
