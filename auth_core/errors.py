@@ -13,3 +13,9 @@ class PermissionException(core_exceptions.PermissionException):
     """
     """
     pass
+
+
+class DuplicateCredentials(Exception):
+    """
+    """
+    pass

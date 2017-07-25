@@ -5,7 +5,8 @@ import base64
 from Crypto.Protocol.KDF import PBKDF2
 
 from auth_core.errors import AuthenticationError
-from auth_core.entities import AuthUser, AuthLogin
+from auth_core.internal.entities import AuthUserMethodEntity
+from auth_core.internal.entities import AuthUserEntity
 from auth_core.appengine_tools import get_resource_id_from_key
 __all__ = ['get_user_by_token']
 
@@ -30,12 +31,16 @@ def get_user_by_token(token):
     except ValueError, e:
         raise AuthenticationError(e)
 
-    user = AuthUser.query(AuthUser.username==un).get()
+    # TODO: Replace with internal.api.users.get_by_username
+    user = AuthUserEntity.query(AuthUserEntity.username==un).get()
     if not user:
         raise AuthenticationError('Username is invalid')
 
-    l_key = AuthLogin.generate_key(user.key, 'basic', get_resource_id_from_key(user.key))
+    # TODO: Reduce this to an api method
+    l_key = AuthUserMethodEntity.generate_key(user.key, 'basic', get_resource_id_from_key(user.key))
     login = l_key.get()
+    if not login:
+        raise AuthenticationError("Could not find login for user")
 
     pwhash, pwsalt = login.auth_data.split(":")
 
@@ -92,10 +97,10 @@ def create_temp():
     login.put()
 """
 
+
 def get_login_properties_for_google(user, auth_key, auth_data=None):
     """
     """
-
 
     return
 

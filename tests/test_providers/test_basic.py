@@ -4,7 +4,7 @@ from tests import TestCaseBase
 
 from auth_core.appengine_tools import get_resource_id_from_key
 from auth_core.providers import basic
-from auth_core.entities import AuthUser, AuthLogin
+from auth_core.internal.entities import AuthUserEntity, AuthUserMethodEntity
 from auth_core.errors import AuthenticationError
 
 
@@ -36,12 +36,12 @@ class EncodeValidatePasswordTests(TestCaseBase):
 class GetUserByToken(TestCaseBase):
     def test_success(self):
         # Create a User
-        user_key = AuthUser(username="testUser1").put()
+        user_key = AuthUserEntity(username="testUser1").put()
 
         # Create a password
         pwhash, pwsalt = basic.encode_password('jive')
         user_id = get_resource_id_from_key(user_key)
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
+        login_key = AuthUserMethodEntity(key=AuthUserMethodEntity.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
                               auth_key=user_id,
                               auth_data="%s:%s" % (pwhash, pwsalt),
@@ -56,12 +56,12 @@ class GetUserByToken(TestCaseBase):
 
     def test_invalid_password(self):
         # Create a User
-        user_key = AuthUser(username="testUser1").put()
+        user_key = AuthUserEntity(username="testUser1").put()
 
         # Create a password
         pwhash, pwsalt = basic.encode_password('jive')
         user_id = get_resource_id_from_key(user_key)
-        AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
+        AuthUserMethodEntity(key=AuthUserMethodEntity.generate_key(user_key, 'basic', user_id),
                   auth_type='basic',
                   auth_key=user_id,
                   auth_data="%s:%s" % (pwhash, pwsalt),

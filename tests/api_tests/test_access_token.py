@@ -3,7 +3,8 @@ import datetime
 
 from tests import TestCaseBase
 
-from auth_core.entities import AuthUser, AuthLogin
+from auth_core.internal.entities import AuthUserEntity, AuthUserMethodEntity
+from auth_core.models import AuthUser
 from auth_core.appengine_tools import get_resource_id_from_key
 from auth_core.api import access_tokens as access_tokens_api
 from auth_core.errors import AuthenticationError
@@ -86,9 +87,9 @@ class ReadAccessTokenTests(TestCaseBase):
 class MakeTokenUserDataDictTests(TestCaseBase):
     def test_base(self):
         # Setup Test
-        user_key = AuthUser(username="testUser1").put()
+        user_key = AuthUserEntity(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
+        login_key = AuthUserMethodEntity(key=AuthUserMethodEntity.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
                               auth_key=user_id,
                               auth_data='hashed_password:salt',
@@ -108,10 +109,10 @@ class MakeTokenUserDataDictTests(TestCaseBase):
 class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
     def test_base(self):
         # Setup Test
-        user_key = AuthUser(username="testUser1").put()
+        user_key = AuthUserEntity(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
 
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
+        login_key = AuthUserMethodEntity(key=AuthUserMethodEntity.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
                               auth_key=user_id,
                               auth_data='hashed_password:salt',
@@ -126,10 +127,10 @@ class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
         # Check results
         self.assertEquals(len(result), 2)
         self.assertTrue(isinstance(result[0], AuthUser))
-        self.assertTrue(result[0].key, user_key)
+        self.assertEquals(result[0].id, get_resource_id_from_key(user_key))
 
-        self.assertTrue(isinstance(result[1], AuthLogin))
-        self.assertTrue(result[1].key, login_key)
+        self.assertTrue(isinstance(result[1], AuthUserMethodEntity))
+        self.assertEquals(result[1].key, login_key)
 
     def test_empty_dict(self):
         access_token = access_tokens_api.create_access_token({})
@@ -137,9 +138,9 @@ class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
         self.assertRaises(AuthenticationError, access_tokens_api.get_user_and_login_from_access_token, access_token)
 
     def test_invalid_user_id(self):
-        user_key = AuthUser(username="testUser1").put()
+        user_key = AuthUserEntity(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
+        login_key = AuthUserMethodEntity(key=AuthUserMethodEntity.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
                               auth_key=user_id,
                               auth_data='hashed_password:salt',
@@ -150,10 +151,10 @@ class GetUserAndLoginFromAccessTokenTests(TestCaseBase):
         self.assertRaises(AuthenticationError, access_tokens_api.get_user_and_login_from_access_token, access_token)
 
     def test_invalid_login(self):
-        user_key = AuthUser(username="testUser1").put()
+        user_key = AuthUserEntity(username="testUser1").put()
         user_id = get_resource_id_from_key(user_key)
 
-        login_key = AuthLogin(key=AuthLogin.generate_key(user_key, 'basic', user_id),
+        login_key = AuthUserMethodEntity(key=AuthUserMethodEntity.generate_key(user_key, 'basic', user_id),
                               auth_type='basic',
                               auth_key=user_id,
                               auth_data='hashed_password:salt',

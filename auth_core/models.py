@@ -1,11 +1,12 @@
-# Models for Users/Authentication, etc
+from rest_core.models import Model
+
 
 from google.appengine.ext import ndb
 
 
-class AuthUser(ndb.Model):
+class AuthUser(Model):
     """
-    Lightweight model representing a system user
+    Domain model representing a system user
     """
 
     username = ndb.StringProperty()
@@ -38,27 +39,14 @@ class AuthUser(ndb.Model):
         return hasattr(self, '_active_login') and self._active_login
 
 
-class AuthLogin(ndb.Model):
+class AuthUserMethod(Model):
     """
-    Storage of the various authentication records for a user
-
-    Note: Entity keys are defined by AuthLogin.generate_key() and the user is the parent of the EG
+    Domain model representing a user's authentication method
     """
     auth_type = ndb.StringProperty()
     auth_key = ndb.StringProperty()
     auth_data = ndb.TextProperty()
-    user_key = ndb.KeyProperty(kind=AuthUser)
-
-    @staticmethod
-    def generate_key_name(user_key, auth_type, auth_key):
-        # TODO: Check for valid auth_type
-        # TODO: Check arg types
-        return "%s:%s:%s" % (user_key.id(), auth_type, auth_key)
-
-    @staticmethod
-    def generate_key(user_key, auth_type, auth_key):
-        return ndb.Key('AuthLogin', AuthLogin.generate_key_name(user_key, auth_type, auth_key),
-                       parent=user_key)
+    user_resource_id = ndb.StringProperty()
 
 
 class AnonymousAuthUser(object):
@@ -89,22 +77,3 @@ class AnonymousAuthUser(object):
             AuthUser
         """
         return False
-
-
-class AuthUserMethod(ndb.Model):
-    auth_type = ndb.StringProperty()  # GOOGLE, FACEBOOK, PASSWORD, etc
-    auth_token = ndb.StringProperty()  # Whatever the token is for
-    auth_data = ndb.StringProperty()
-    user_key = ndb.KeyProperty(kind=AuthUser)
-    is_activate = ndb.BooleanProperty()
-
-
-class AuthInvite(ndb.Model):
-    created_date = ndb.DateTimeProperty(auto_now_add=True)
-    email = ndb.StringProperty()
-    user_resource_id = ndb.StringProperty()
-    accepted_date = ndb.DateTimeProperty()
-
-    @property
-    def is_accepted(self):
-        return self.accepted_date is not None

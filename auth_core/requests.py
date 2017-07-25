@@ -1,7 +1,7 @@
 from auth_core.constants import ACTIVATED_LOGIN_KEY
 from auth_core.constants import REQUEST_USER_KEY
 from auth_core.authentication import authenticate
-from auth_core.entities import AnonymousAuthUser
+from auth_core.models import AnonymousAuthUser
 from auth_core.errors import AuthenticationError
 
 __all__ = ['mark_user_authenticated',

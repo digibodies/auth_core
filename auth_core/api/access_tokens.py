@@ -5,6 +5,9 @@ import jwt
 
 import auth_settings
 from auth_core.appengine_tools import get_resource_id_from_key
+from auth_core.appengine_tools import get_key_from_resource_id
+
+
 from auth_core.errors import AuthenticationError
 from auth_core.api import users as users_api
 from auth_core.constants import TOKEN_KEYS_V1
@@ -80,11 +83,13 @@ def get_user_and_login_from_access_token(access_token):
     login_auth_type = user_data.get(TOKEN_KEYS_V1.LOGIN_TYPE, None)  # i.e "google"
     login_auth_key = user_data.get(TOKEN_KEYS_V1.LOGIN_KEY, None)  # i.e. google uid or user id
 
-    # Resolve User
+    # Resolve User Model
     user = users_api.get_user_by_id(user_id)
 
     if not user:
         raise AuthenticationError('Could not resolve user. Have they been deleted?')
+
+    user_key = get_key_from_resource_id(user.id)
 
     # Resolve the active login used originally regardless of type
     if not login_auth_type:
@@ -95,7 +100,7 @@ def get_user_and_login_from_access_token(access_token):
         # How did you originally login?
         raise AuthenticationError("Could not determine login auth key from key")
 
-    l_key = users_api.AuthLogin.generate_key(user.key, login_auth_type, login_auth_key)
+    l_key = users_api.AuthUserMethodEntity.generate_key(user_key, login_auth_type, login_auth_key)
     login = l_key.get()
 
     return user, login
