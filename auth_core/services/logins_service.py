@@ -20,6 +20,10 @@ def get_login_by_id(resource_id):
     return login_model
 
 
+def get_login_by_auth_data(*args, **kwargs):
+    return logins_api.get_login_by_auth_data(*args, **kwargs)
+
+
 def create_login(user_resource_id, data):
     """
     """
@@ -41,6 +45,7 @@ def create_login(user_resource_id, data):
 def update_login(login_model, data):
     """
     """
+    # TODO: Blow up if we don't have login_model and data...
 
     auth_type = data.get('auth_type')
     auth_key = data.get('auth_key')

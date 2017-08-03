@@ -1,6 +1,5 @@
 from rest_core.models import Model
 
-
 from google.appengine.ext import ndb
 
 

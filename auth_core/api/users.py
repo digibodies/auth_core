@@ -7,34 +7,40 @@ from auth_core.models import AuthUser
 from auth_core.providers import basic
 
 __all__ = ['get_user_by_id',
-           'get_login_by_user_and_type_and_key',
            'create_user',
            'create_login']
 
 DEFAULT_QUERY_LIMIT = 100
 
 
-def get_user_by_id(resource_id):
+def _get_key_by_id(resource_id):
     """
-    Resolve a user by id
-    # TODO: Entity type safe get
+
     """
     try:
-        user_key = get_key_from_resource_id(resource_id)
-        return _populate_model(user_key.get())
+        return get_key_from_resource_id(resource_id)
     except ValueError:
         return None
 
 
-def get_login_by_user_and_type_and_key(user_key, login_type, login_key):
+def _get_entity_by_id(resource_id):
     """
     """
+    user_key = _get_key_by_id(resource_id)
+    if (user_key):
+        return user_key.get()
+    return None
 
-    # TODO: Ensure known login_auth_type
 
-    l_key = AuthUserMethodEntity.generate_key(user_key, login_type, login_key)
-    login = l_key.get()
-    return login
+def get_user_by_id(resource_id):
+    """
+    Resolve a user by id
+    """
+    try:
+        user_entity = _get_entity_by_id(resource_id)
+        return _populate_model(user_entity)
+    except ValueError:
+        return None
 
 
 def create_user(username, email, first_name, last_name):
@@ -42,21 +48,20 @@ def create_user(username, email, first_name, last_name):
     """
 
     # Check for existence of user with the same username
-    user = AuthUserEntity.query(AuthUserEntity.username==username).get()
-    if (user):
-        raise Exception("A user with this username already exists")
+    if (get_by_username(username)):
+        raise ValueError("A user with this username already exists")
 
     # Persist to Appengine Datastore
-    user = AuthUserEntity(username=username,
-                          email=email,
-                          first_name=first_name,
-                          last_name=last_name)
+    user_entity = AuthUserEntity(username=username,
+                                 email=email,
+                                 first_name=first_name,
+                                 last_name=last_name)
 
-    user.is_activated = True  # TODO: Don't do this by default
-    user.put()
+    user_entity.is_activated = True  # TODO: Don't do this by default
+    user_entity.put()
 
     # Convert to Domain Model
-    user_model = _populate_model(user)
+    user_model = _populate_model(user_entity)
     return user_model
 
 
